@@ -1447,11 +1447,6 @@ unsigned int uclamp_task(struct task_struct *p)
 	return util;
 }
 
-bool uclamp_boosted(struct task_struct *p)
-{
-	return uclamp_eff_value(p, UCLAMP_MIN) > 0;
-}
-
 bool uclamp_latency_sensitive(struct task_struct *p)
 {
 #ifdef CONFIG_UCLAMP_TASK_GROUP
@@ -1541,14 +1536,6 @@ unsigned int uclamp_task(struct task_struct *p)
 #endif
 
 	return util;
-}
-
-bool uclamp_boosted(struct task_struct *p)
-{
-#ifdef CONFIG_SCHED_TUNE
-	return schedtune_task_boost(p) > 0;
-#endif
-	return false;
 }
 
 bool uclamp_latency_sensitive(struct task_struct *p)
@@ -8118,28 +8105,6 @@ u64 cpu_uclamp_ls_read_u64(struct cgroup_subsys_state *css,
 
 	return (u64) tg->latency_sensitive;
 }
-
-int cpu_uclamp_boost_write_u64(struct cgroup_subsys_state *css,
-				   struct cftype *cftype, u64 boosted)
-{
-	struct task_group *tg;
-
-	if (boosted > 1)
-		return -EINVAL;
-	tg = css_tg(css);
-	tg->boosted = (unsigned int) boosted;
-
-	return 0;
-}
-
-u64 cpu_uclamp_boost_read_u64(struct cgroup_subsys_state *css,
-				  struct cftype *cft)
-{
-	struct task_group *tg = css_tg(css);
-
-	return (u64) tg->boosted;
-}
-
 #endif /* CONFIG_UCLAMP_TASK_GROUP */
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
