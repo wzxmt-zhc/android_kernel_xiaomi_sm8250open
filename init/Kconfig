@@ -1214,6 +1214,12 @@ config SCHED_TUNE
 	  influence task placement and CPU frequency selection (if
 	  utilization-driven frequency selection is in use).
 
+config UCLAMP_ASSIST
+	bool "UClamp configuration helper"
+	depends on CPUSETS && ANDROID && UCLAMP_TASK && UCLAMP_TASK_GROUP
+	help
+	  This option enabled in-kernel uclamp setting overrides.
+
 	  If unsure, say N.
 
 config SYSFS_DEPRECATED
