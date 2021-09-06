@@ -1378,8 +1378,10 @@ struct task_struct {
 	 */
 	u64				timer_slack_ns;
 	u64				default_timer_slack_ns;
+#ifdef CONFIG_MIHW
 	unsigned int			top_app;
 	unsigned int			inherit_top_app;
+#endif
 #ifdef CONFIG_PERF_HUMANTASK
 	unsigned int                    human_task;
 	unsigned int			cpux;
@@ -1484,8 +1486,6 @@ struct task_struct {
 	/* Used by LSM modules for access restriction: */
 	void				*security;
 #endif
-	/* task is frozen/stopped (used by the cgroup freezer) */
-	ANDROID_KABI_USE(1, unsigned frozen:1);
 #ifdef CONFIG_KPERFEVENTS
 	/* lock to protect kperfevents */
 	rwlock_t kperfevents_lock;
@@ -1494,6 +1494,8 @@ struct task_struct {
 	 */
 	void *kperfevents;
 #endif
+	/* task is frozen/stopped (used by the cgroup freezer) */
+	ANDROID_KABI_USE(1, unsigned frozen:1);
 
 #ifdef CONFIG_ANDROID_SIMPLE_LMK
 	struct task_struct		*simple_lmk_next;
@@ -2253,6 +2255,7 @@ static inline void set_wake_up_idle(bool enabled)
 		current->flags &= ~PF_WAKE_UP_IDLE;
 }
 
+#ifdef CONFIG_MIHW
 extern inline bool is_critical_task(struct task_struct *p);
 
 extern inline bool is_top_app(struct task_struct *p);
@@ -2263,4 +2266,5 @@ extern inline bool is_inherit_top_app(struct task_struct *p);
 extern inline void set_inherit_top_app(struct task_struct *p,
 					struct task_struct *from);
 extern inline void restore_inherit_top_app(struct task_struct *p);
+#endif /* CONFIG_MIHW */
 #endif

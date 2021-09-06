@@ -8712,6 +8712,7 @@ void sched_exit(struct task_struct *p)
 
 __read_mostly bool sched_predl = 1;
 
+#ifdef CONFIG_MIHW
 inline bool is_critical_task(struct task_struct *p)
 {
 	return is_top_app(p) || is_inherit_top_app(p);
@@ -8749,3 +8750,4 @@ inline void restore_inherit_top_app(struct task_struct *p)
 #endif
 	}
 }
+#endif /* CONFIG_MIHW */

@@ -195,3 +195,4 @@ obj-$(CONFIG_SENSORS_SSC)	+= sensors/
 obj-$(CONFIG_FRAGMENTION)   += fragmention/
 
 obj-y     += data-kernel/
+obj-$(CONFIG_MILLET)		+= millet/

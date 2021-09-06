@@ -237,4 +237,6 @@ source "drivers/fragmention/Kconfig"
 
 source "drivers/data-kernel/Kconfig"
 
+source "drivers/millet/Kconfig"
+
 endmenu

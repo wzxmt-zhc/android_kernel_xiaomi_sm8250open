@@ -14,8 +14,10 @@
 
 #include "walt.h"
 
+#ifdef CONFIG_KPERFEVENTS
 #include <linux/kperfevents.h>
 #include <trace/events/kperfevents_sched.h>
+#endif
 
 int sched_rr_timeslice = RR_TIMESLICE;
 int sysctl_sched_rr_timeslice = (MSEC_PER_SEC / HZ) * RR_TIMESLICE;
@@ -1401,6 +1403,7 @@ static void dequeue_rt_entity(struct sched_rt_entity *rt_se, unsigned int flags)
 	enqueue_top_rt_rq(&rq->rt);
 }
 
+#ifdef CONFIG_KPERFEVENTS
 static inline void
 update_stats_enqueue_wakeup(struct rq *rq, struct task_struct *p)
 {
@@ -1419,9 +1422,8 @@ update_stats_enqueue_wakeup(struct rq *rq, struct task_struct *p)
 
 		account_scheduler_latency(p, delta >> 10, 1);
 		trace_sched_stat_sleep(p, delta);
-		if (unlikely(is_above_kperfevents_threshold_nanos(delta))) {
+		if (unlikely(is_above_kperfevents_threshold_nanos(delta)))
 			trace_kperfevents_sched_wait(p, delta, true);
-		}
 	}
 	if (se->statistics.block_start) {
 		u64 delta = rq_clock(rq) - se->statistics.block_start;
@@ -1443,12 +1445,12 @@ update_stats_enqueue_wakeup(struct rq *rq, struct task_struct *p)
 		account_scheduler_latency(p, delta >> 10, 0);
 		trace_sched_stat_blocked(p, delta);
 		trace_sched_blocked_reason(p);
-		if (unlikely(is_above_kperfevents_threshold_nanos(delta))) {
+		if (unlikely(is_above_kperfevents_threshold_nanos(delta)))
 			trace_kperfevents_sched_wait(p, delta, false);
-		}
 	}
 #endif
 }
+#endif /* CONFIG_KPERFEVENTS */
 
 /*
  * Adding/removing a task to/from a priority array:
@@ -1460,11 +1462,12 @@ enqueue_task_rt(struct rq *rq, struct task_struct *p, int flags)
 
 	schedtune_enqueue_task(p, cpu_of(rq));
 
-	if (flags & ENQUEUE_WAKEUP)
+	if (flags & ENQUEUE_WAKEUP) {
+#ifdef CONFIG_KPERFEVENTS
 		update_stats_enqueue_wakeup(rq, p);
-
-	if (flags & ENQUEUE_WAKEUP)
+#endif
 		rt_se->timeout = 0;
+	}
 
 	enqueue_rt_entity(rt_se, flags);
 	walt_inc_cumulative_runnable_avg(rq, p);
@@ -1473,6 +1476,7 @@ enqueue_task_rt(struct rq *rq, struct task_struct *p, int flags)
 		enqueue_pushable_task(rq, p);
 }
 
+#ifdef CONFIG_KPERFEVENTS
 static inline void
 update_stats_dequeue_sleep(struct rq *rq, struct task_struct *p)
 {
@@ -1484,6 +1488,7 @@ update_stats_dequeue_sleep(struct rq *rq, struct task_struct *p)
 		se->statistics.block_start = rq_clock(rq);
 #endif
 }
+#endif /* CONFIG_KPERFEVENTS */
 
 static void dequeue_task_rt(struct rq *rq, struct task_struct *p, int flags)
 {
@@ -1491,8 +1496,10 @@ static void dequeue_task_rt(struct rq *rq, struct task_struct *p, int flags)
 
 	schedtune_dequeue_task(p, cpu_of(rq));
 
+#ifdef CONFIG_KPERFEVENTS
 	if (flags & DEQUEUE_SLEEP)
 		update_stats_dequeue_sleep(rq, p);
+#endif
 
 	update_curr_rt(rq);
 	dequeue_rt_entity(rt_se, flags);

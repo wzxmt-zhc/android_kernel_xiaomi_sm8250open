@@ -422,7 +422,8 @@ static struct ctl_table kern_table[] = {
 		.extra1		= &neg_three,
 		.extra2		= &four,
 	},
-        {
+#ifdef CONFIG_MIHW
+	{
 		.procname	= "sched_boost_top_app",
 		.data		= &sysctl_sched_boost_top_app,
 		.maxlen		= sizeof(unsigned int),
@@ -431,6 +432,7 @@ static struct ctl_table kern_table[] = {
 		.extra1		= &zero,
 		.extra2		= &one,
 	},
+#endif
 	{
 		.procname	= "sched_conservative_pl",
 		.data		= &sysctl_sched_conservative_pl,

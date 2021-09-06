@@ -73,6 +73,10 @@
 
 #include <trace/events/sched.h>
 
+#ifdef CONFIG_PERF_HUMANTASK
+#include <linux/sched.h>
+#endif
+
 int suid_dumpable = 0;
 
 static LIST_HEAD(formats);
@@ -1270,17 +1274,19 @@ void __set_task_comm(struct task_struct *tsk, const char *buf, bool exec)
 #endif
 	task_lock(tsk);
 #ifdef CONFIG_PERF_HUMANTASK
-	if( !strcmp(parent->comm, "system_server")){
-		if(!strcmp(buf, "InputDispatcher") ||!strcmp(buf, "InputReader") ){
-			tsk->human_task = MAX_LEVER+1 ;
-		}else if(tmpbuf){
+	if (!strcmp(parent->comm, "system_server")) {
+		if (!strcmp(buf, "InputDispatcher")
+			|| !strcmp(buf, "InputReader")) {
+			tsk->human_task = MAX_LEVER + 1;
+		} else if (tmpbuf) {
 			memset(tmpbuf,0,128);
 			sprintf(tmpbuf, "Binder:%d_%X", tsk->tgid, 1);
-			//binder/ProcessState.cpp
-			if(!strcmp(tmpbuf, buf) )  tsk->human_task = 1 ;
+			if (!strcmp(tmpbuf, buf))
+				tsk->human_task = 1;
 		}
 	}
-	if(tmpbuf) kfree(tmpbuf);
+	if (tmpbuf)
+		kfree(tmpbuf);
 #endif
 	trace_task_rename(tsk, buf);
 	strlcpy(tsk->comm, buf, sizeof(tsk->comm));

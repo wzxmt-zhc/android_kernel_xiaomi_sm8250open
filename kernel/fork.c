@@ -2435,8 +2435,10 @@ long _do_fork(unsigned long clone_flags,
 		get_task_struct(p);
 	}
 
+#ifdef CONFIG_MIHW
 	p->top_app = 0;
 	p->inherit_top_app = 0;
+#endif
 #ifdef CONFIG_PERF_HUMANTASK
         p->human_task = 0;
 #endif

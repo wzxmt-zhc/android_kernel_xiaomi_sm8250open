@@ -2672,14 +2672,18 @@ int cgroup_migrate(struct task_struct *leader, bool threadgroup,
  *
  * Call holding cgroup_mutex and cgroup_threadgroup_rwsem.
  */
- #define PATH_LEN 1024
+#ifdef CONFIG_PERF_HUMANTASK
+#define PATH_LEN 1024
+#endif
 int cgroup_attach_task(struct cgroup *dst_cgrp, struct task_struct *leader,
 		       bool threadgroup)
 {
 	DEFINE_CGROUP_MGCTX(mgctx);
 	struct task_struct *task;
 	int ret;
+#ifdef CONFIG_PERF_HUMANTASK
 	char dst_path[PATH_LEN ];
+#endif
 
 	ret = cgroup_migrate_vet_dst(dst_cgrp);
 	if (ret)

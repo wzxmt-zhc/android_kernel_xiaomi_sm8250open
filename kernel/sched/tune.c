@@ -550,17 +550,17 @@ int schedtune_task_boost(struct task_struct *p)
 	rcu_read_lock();
 	st = task_schedtune(p);
 	task_boost = st->boost;
-#ifdef CONFIG_SCHED_WALT
+#ifdef CONFIG_MIHW
 	if (sched_boost_top_app()) {
 		if (1 == st->sched_boost_no_override)
 			task_boost = 20;
-		if(is_critical_task(p))
+		if (is_critical_task(p))
 			task_boost = 40;
 	}
+#endif
 #ifdef CONFIG_PERF_HUMANTASK
 	if (p->human_task)
 		task_boost = 40;
-#endif
 #endif
 	rcu_read_unlock();
 
@@ -579,10 +579,10 @@ int schedtune_prefer_idle(struct task_struct *p)
 	rcu_read_lock();
 	st = task_schedtune(p);
 	prefer_idle = st->prefer_idle;
-#ifdef CONFIG_SCHED_WALT
-	if (sched_boost_top_app() && 1 == st->sched_boost_no_override) {
+#ifdef CONFIG_MIHW
+	if (sched_boost_top_app()
+		&& 1 == st->sched_boost_no_override)
 		prefer_idle = 1;
-	}
 #endif
 	rcu_read_unlock();
 
