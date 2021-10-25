@@ -838,22 +838,29 @@ static void rebuild_sched_domains_locked(void)
 	cpumask_var_t *doms;
 	int ndoms;
 
+    pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	lockdep_assert_cpus_held();
+	pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	lockdep_assert_held(&cpuset_mutex);
+	pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 
 	/*
 	 * We have raced with CPU hotplug. Don't do anything to avoid
 	 * passing doms with offlined cpu to partition_sched_domains().
 	 * Anyways, hotplug work item will rebuild sched domains.
 	 */
+	 pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	if (!cpumask_equal(top_cpuset.effective_cpus, cpu_active_mask))
 		return;
+	pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 
 	/* Generate domain masks and attrs */
 	ndoms = generate_sched_domains(&doms, &attr);
+    pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 
 	/* Have scheduler rebuild the domains */
 	partition_sched_domains(ndoms, doms, attr);
+    pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 }
 #else /* !CONFIG_SMP */
 static void rebuild_sched_domains_locked(void)
@@ -920,54 +927,72 @@ static void update_cpumasks_hier(struct cpuset *cs, struct cpumask *new_cpus)
 	struct cpuset *cp;
 	struct cgroup_subsys_state *pos_css;
 	bool need_rebuild_sched_domains = false;
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	rcu_read_lock();
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	cpuset_for_each_descendant_pre(cp, pos_css, cs) {
 		struct cpuset *parent = parent_cs(cp);
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		cpumask_and(new_cpus, cp->cpus_allowed, parent->effective_cpus);
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		/*
 		 * If it becomes empty, inherit the effective mask of the
 		 * parent, which is guaranteed to have some CPUs.
 		 */
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		if (is_in_v2_mode() && cpumask_empty(new_cpus))
 			cpumask_copy(new_cpus, parent->effective_cpus);
+			pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
+
 
 		/* Skip the whole subtree if the cpumask remains the same. */
 		if (cpumask_equal(new_cpus, cp->effective_cpus)) {
 			pos_css = css_rightmost_descendant(pos_css);
+			pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 			continue;
 		}
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		if (!css_tryget_online(&cp->css))
 			continue;
 		rcu_read_unlock();
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		spin_lock_irq(&callback_lock);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		cpumask_copy(cp->effective_cpus, new_cpus);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		spin_unlock_irq(&callback_lock);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 
 		WARN_ON(!is_in_v2_mode() &&
 			!cpumask_equal(cp->cpus_allowed, cp->effective_cpus));
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
+
 
 		update_tasks_cpumask(cp);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
+
 
 		/*
 		 * If the effective cpumask of any non-empty cpuset is changed,
 		 * we need to rebuild sched domains.
 		 */
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
+
 		if (!cpumask_empty(cp->cpus_allowed) &&
 		    is_sched_load_balance(cp))
 			need_rebuild_sched_domains = true;
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		rcu_read_lock();
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		css_put(&cp->css);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	}
 	rcu_read_unlock();
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 
 	if (need_rebuild_sched_domains)
 		rebuild_sched_domains_locked();
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 }
 
 /**
@@ -1717,9 +1742,9 @@ static ssize_t cpuset_write_resmask(struct kernfs_open_file *of,
 	struct cpuset *cs = css_cs(of_css(of));
 	struct cpuset *trialcs;
 	int retval = -ENODEV;
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	buf = strstrip(buf);
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	/*
 	 * CPU or memory hotunplug may leave @cs w/o any execution
 	 * resources, in which case the hotplug code asynchronously updates
@@ -1740,44 +1765,63 @@ static ssize_t cpuset_write_resmask(struct kernfs_open_file *of,
 	 * hierarchies.
 	 */
 	css_get(&cs->css);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	kernfs_break_active_protection(of->kn);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	flush_work(&cpuset_hotplug_work);
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	get_online_cpus();
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	mutex_lock(&cpuset_mutex);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	if (!is_cpuset_online(cs))
 		goto out_unlock;
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	trialcs = alloc_trial_cpuset(cs);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	if (!trialcs) {
 		retval = -ENOMEM;
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		goto out_unlock;
 	}
 
 	switch (of_cft(of)->private) {
 	case FILE_CPULIST:
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		retval = update_cpumask(cs, trialcs, buf);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		break;
 	case FILE_MEMLIST:
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		retval = update_nodemask(cs, trialcs, buf);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		break;
 	default:
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		retval = -EINVAL;
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		break;
 	}
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	free_trial_cpuset(trialcs);
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 #ifdef CONFIG_UCLAMP_ASSIST
 	uclamp_set(of, nbytes, off);
 #endif
 out_unlock:
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	mutex_unlock(&cpuset_mutex);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	put_online_cpus();
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	kernfs_unbreak_active_protection(of->kn);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	css_put(&cs->css);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	flush_workqueue(cpuset_migrate_mm_wq);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	return retval ?: nbytes;
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 }
 
 /*

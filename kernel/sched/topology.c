@@ -2188,22 +2188,26 @@ void partition_sched_domains(int ndoms_new, cpumask_var_t doms_new[],
 	int i, j, n;
 	int new_topology;
 
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	mutex_lock(&sched_domains_mutex);
 
 	/* Always unregister in case we don't destroy any domains: */
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	unregister_sched_domain_sysctl();
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	/* Let the architecture update CPU core mappings: */
 	new_topology = arch_update_cpu_topology();
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	if (!doms_new) {
 		WARN_ON_ONCE(dattr_new);
 		n = 0;
 		doms_new = alloc_sched_domains(1);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		if (doms_new) {
 			n = 1;
 			cpumask_and(doms_new[0], cpu_active_mask,
 				    housekeeping_cpumask(HK_FLAG_DOMAIN));
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		}
 	} else {
 		n = ndoms_new;
@@ -2215,9 +2219,11 @@ void partition_sched_domains(int ndoms_new, cpumask_var_t doms_new[],
 			if (cpumask_equal(doms_cur[i], doms_new[j]) &&
 			    dattrs_equal(dattr_cur, i, dattr_new, j))
 				goto match1;
+				pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		}
 		/* No match - a current sched domain not in new doms_new[] */
 		detach_destroy_domains(doms_cur[i]);
+		pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 match1:
 		;
 	}
@@ -2226,8 +2232,10 @@ match1:
 	if (!doms_new) {
 		n = 0;
 		doms_new = &fallback_doms;
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		cpumask_and(doms_new[0], cpu_active_mask,
 			    housekeeping_cpumask(HK_FLAG_DOMAIN));
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	}
 
 	/* Build new domains: */
@@ -2236,9 +2244,11 @@ match1:
 			if (cpumask_equal(doms_new[i], doms_cur[j]) &&
 			    dattrs_equal(dattr_new, i, dattr_cur, j))
 				goto match2;
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 		}
 		/* No match - add a new doms_new */
 		build_sched_domains(doms_new[i], dattr_new ? dattr_new + i : NULL);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 match2:
 		;
 	}
@@ -2251,26 +2261,34 @@ match2:
 			    cpu_rq(cpumask_first(doms_cur[j]))->rd->pd) {
 				has_eas = true;
 				goto match3;
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 			}
 		}
 		/* No match - add perf. domains for a new rd */
 		has_eas |= build_perf_domains(doms_new[i]);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 match3:
 		;
 	}
 	sched_energy_set(has_eas);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 #endif
 
 	/* Remember the new sched domains: */
 	if (doms_cur != &fallback_doms)
 		free_sched_domains(doms_cur, ndoms_cur);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 
 	kfree(dattr_cur);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	doms_cur = doms_new;
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	dattr_cur = dattr_new;
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	ndoms_cur = ndoms_new;
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	register_sched_domain_sysctl();
-
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	mutex_unlock(&sched_domains_mutex);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 }

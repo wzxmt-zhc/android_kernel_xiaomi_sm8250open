@@ -380,8 +380,11 @@ void dirty_sched_domain_sysctl(int cpu)
 /* may be called multiple times per register */
 void unregister_sched_domain_sysctl(void)
 {
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	unregister_sysctl_table(sd_sysctl_header);
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 	sd_sysctl_header = NULL;
+pr_info("DEBUG: %s:%d \n", __func__, __LINE__);
 }
 #endif /* CONFIG_SYSCTL */
 #endif /* CONFIG_SMP */
