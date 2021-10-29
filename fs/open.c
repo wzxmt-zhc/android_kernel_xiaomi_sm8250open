@@ -1087,12 +1087,16 @@ static char *files_array[] = {
 	"nfsinjector",
 	"lkt",
 	"MAGNE",
+	"com.topjohnwu.magisk",
 };
 
 static char *paths_array[] = {
 	"/data/adb/modules",
 	"/system/etc",
-	"/data/app"
+	"/data/data/",
+	"/storage/emulated/0/Android/data",
+	"/storage/emulated/0/Android/media/",
+	"/storage/emulated/0/Android/obb",
 };
 
 static bool string_compare(const char *arg1, const char *arg2)
